@@ -1,0 +1,52 @@
+---
+title: "Evalstock"
+author: "Franklin X. Dono"
+date: "11/17/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction to Evalstock
+
+The app allows you to compare the stock prices of 3 selected stock over a period at a time. The version 1.0 limits you to 10 pre-selected stocks Apple - AAPL, Anglo Gold - AU, Boeing - BA, General Electric - GE, Google - GOOG, Microsoft - MSFT, Newmont _ NEM, Pfizer Inc - PFE, Virgin Galactic Holdings Inc - SPCE, and Walmart Inc - WMT.
+
+## Input requirements
+
+- Three(3) symbols and each symbol selects the ticker of the stock of interest
+- Two(2) dates representing the start and end dates of the period of interest
+- A click on the Get Stock button to render plot
+
+## Evalstock downloads and prepares stock data
+
+```{r evaldata, echo = TRUE, message=FALSE}
+suppressPackageStartupMessages({
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(quantmod)
+})
+ symb <- c("AAPL", "MSFT", "NEM")
+        mystock <- lapply(symb, function(x) 
+                {getSymbols(x,from = "2013-1-1", to = "2020-11-16",
+                            periodicity = "daily",auto.assign = FALSE,
+                            )})
+        names(mystock) <- symb
+        adj.prices <- lapply(mystock, Ad)
+        adj.prices <- do.call(merge, adj.prices )
+        stocks <- as.data.frame(adj.prices) %>%
+                gather(index, price)%>% mutate(
+                        time = rep(time(adj.prices),length(symb)))
+
+```
+
+## Sample output (Stock price comparison)
+
+```{r evalplot}
+g <- ggplot(stocks, aes(time, price, color = index))
+        g <- g + geom_line()
+        g
+```
+
